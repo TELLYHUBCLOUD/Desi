@@ -37,11 +37,10 @@ def get_random_headers():
         "Cache-Control": "no-cache"
     }
 
-API_ID = int(os.environ.get("API_ID", 1401388))
-API_HASH = os.environ.get("API_HASH", "089a340f2fd06aea683cbfb73pp")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8022294985:AAEjHUJ2NHp1WPEcWcQEoeAXz3p7IE9TbFc")
-CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1002699890857")
-
+API_ID = int(os.environ.get("API_ID", 23241238))
+API_HASH = os.environ.get("API_HASH", "e6ff6e3068dbea75500865ac49c3608f")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8110926083:AAHuuv8B5V_GIfkyPNdrrs8vZBHL2Gl-i24")
+CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1002665953559")
 try:
     CHANNEL_ID = int(CHANNEL_ID)
 except ValueError:
