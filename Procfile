@@ -1,1 +1,2 @@
-web: python3 Desi_video.py & python3 desi.py
+web: python3 Desi_video.py
+worker:  python3 desi.py
