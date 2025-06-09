@@ -1,1 +1,2 @@
-web: python3 Desi_video.py
+web: ./start.sh
+
