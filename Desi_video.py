@@ -27,8 +27,13 @@ load_dotenv()
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+CHANNEL_ID = os.getenv("CHANNEL_ID")
+if not CHANNEL_ID:
+    logger.error("CHANNEL_ID is not set in environment variables!")
+    exit(1)
 PORT = int(os.getenv("PORT", 3000))
+
+
 
 def get_random_headers():
     user_agents = [
