@@ -24,6 +24,12 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+PORT = int(os.getenv("PORT", 3000))
+
 def get_random_headers():
     user_agents = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
@@ -37,14 +43,6 @@ def get_random_headers():
         "Cache-Control": "no-cache"
     }
 
-API_ID = int(os.environ.get("API_ID", 23241238))
-API_HASH = os.environ.get("API_HASH", "e6ff6e3068dbea75500865ac49c3608f")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8110926083:AAHuuv8B5V_GIfkyPNdrrs8vZBHL2Gl-i24")
-CHANNEL_ID = -1002665953559
-try:
-    CHANNEL_ID = int(CHANNEL_ID)
-except ValueError:
-    pass
 
 BLACKLIST_FILE = "blacklist.txt"
 
