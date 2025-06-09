@@ -1,2 +1,1 @@
-web: ./start.sh
-worker: ./start.sh
+web: python3 Desi_video.py & python3 desi.py
