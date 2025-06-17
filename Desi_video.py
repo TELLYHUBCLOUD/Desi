@@ -12,6 +12,7 @@ from flask import Flask
 from threading import Thread
 import logging
 import shutil
+import time
 from PIL import Image
 from io import BytesIO
 
@@ -105,39 +106,59 @@ async def fetch_api_data(session, api_url):
 
 async def download_video(video_url, output_path):
     try:
+        # Ensure directory exists
+        dir_path = os.path.dirname(output_path) or "."
+        os.makedirs(dir_path, exist_ok=True)
+
+        # Ensure filename is valid
+        filename = os.path.basename(output_path)
+        if not filename:
+            filename = video_url.split("/")[-1].split("?")[0] or "video.mp4"
+            output_path = os.path.join(dir_path, filename)
+
         cmd = [
             "aria2c",
             video_url,
-            "--out", os.path.basename(output_path),
-            "--dir", os.path.dirname(output_path),
+            "--out", filename,
+            "--dir", dir_path,
             "--allow-overwrite=true",
             "--max-connection-per-server=16",
             "--split=16",
             "--summary-interval=0",
             "--console-log-level=warn"
         ]
-        
-        logger.info(f"Downloading video: {video_url}")
+
+        logger.info(f"Starting download: {video_url}")
+        start_time = time.time()
+
         process = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        
+
         try:
             await asyncio.wait_for(process.communicate(), timeout=300)
         except asyncio.TimeoutError:
-            logger.error("Download timed out")
+            logger.error("Download timed out after 300 seconds.")
             process.kill()
             await process.communicate()
             return False
-        
+
+        end_time = time.time()
+        elapsed = end_time - start_time
+
         if process.returncode != 0:
-            logger.error(f"Download failed with code {process.returncode}")
+            logger.error(f"Download failed with exit code {process.returncode}")
             return False
-        
-        return os.path.exists(output_path) and os.path.getsize(output_path) > 0
-        
+
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            logger.info(f"Download completed successfully in {elapsed:.2f} seconds: {output_path}")
+            return True
+        else:
+            logger.error("Downloaded file is missing or empty.")
+            return False
+
     except Exception as e:
         logger.error(f"Download exception: {str(e)}")
         return False
@@ -180,6 +201,7 @@ async def auto_post():
 
                         video_name = item['name'].strip()
                         video_url = item['content_url']
+                        upload_date = item['content_url']
                         thumb_url = item.get('thumbnail')
 
                         if is_blacklisted(video_name):
