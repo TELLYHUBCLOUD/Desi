@@ -71,13 +71,21 @@ def home():
 def run_flask():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
 
-API_LIST = [
-    "https://you-pom-lover.vercel.app/xvideos/10/Bangladeshi",
-    "https://you-pom-lover.vercel.app/xvideos/10/desi",
-    "https://you-pom-lover.vercel.app/xvideos/10/stepdaughter",
-    "https://you-pom-lover.vercel.app/xvideos/10/sister",
-    "https://you-pom-lover.vercel.app/xvideos/10/bhabhi"
+keywords = [
+    "school", "desi", "college", "bhabhi",
+    "aunty", "teacher", "milf", "teen",
+    "stepmom", "neighbor", "office", "boss",
+    "maid", "sister", "mom", "nurse",
+    "secretary", "interview", "romance", "bathroom",
+    "kitchen", "public", "hidden", "solo",
+    "massage", "lesbian", "cousin", "student",
+    "library", "bus", "train", "hotel"
 ]
+
+
+API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/10/{word}" for word in keywords]
+
+
 
 async def fetch_api_data(session, api_url):
     try:
