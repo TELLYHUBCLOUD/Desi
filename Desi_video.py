@@ -83,7 +83,7 @@ keywords = [
 ]
 
 
-API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/10/{word}" for word in keywords]
+API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/5/{word}" for word in keywords]
 
 
 
