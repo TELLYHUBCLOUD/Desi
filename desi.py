@@ -60,12 +60,20 @@ DUMMY_DATA = [
     }
 ]
 
-API_LIST = [
-    "https://you-pom-lover.vercel.app/xnxx/10/school",
-    "https://you-pom-lover.vercel.app/xnxx/10/desi",
-    "https://you-pom-lover.vercel.app/xnxx/10/college",
-    "https://you-pom-lover.vercel.app/xnxx/10/bhabhi"
+keywords = [
+    "school", "desi", "college", "bhabhi",
+    "aunty", "teacher", "milf", "teen",
+    "stepmom", "neighbor", "office", "boss",
+    "maid", "sister", "mom", "nurse",
+    "secretary", "interview", "romance", "bathroom",
+    "kitchen", "public", "hidden", "solo",
+    "massage", "lesbian", "cousin", "student",
+    "library", "bus", "train", "hotel"
 ]
+
+
+API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/5/{word}" for word in keywords]
+
 
 async def fetch_api_data(session, api_url):
     try:
