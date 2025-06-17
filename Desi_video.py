@@ -90,7 +90,7 @@ keywords = [
     "busty", "shaved", "natural", "tattoo", "glasses"
 ]
 
-API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/5/{word}" for word in keywords]
+API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/10/{word}" for word in keywords]
 
 async def fetch_api_data(session, api_url):
     try:
@@ -103,6 +103,8 @@ async def fetch_api_data(session, api_url):
     except Exception as e:
         logger.error(f"API Fetch Error from {api_url}: {e}")
     return []
+
+
 
 async def download_video(video_url, output_path):
     try:
