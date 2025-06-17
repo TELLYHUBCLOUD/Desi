@@ -6,6 +6,7 @@ import tempfile
 import subprocess
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
+from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from dotenv import load_dotenv
 from flask import Flask
@@ -24,16 +25,17 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-API_ID = int(os.getenv("API_ID"))
+API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
-if not CHANNEL_ID:
-    logger.error("CHANNEL_ID is not set in environment variables!")
-    exit(1)
 PORT = int(os.getenv("PORT", 3000))
 
+if not (API_ID and API_HASH and BOT_TOKEN and CHANNEL_ID):
+    logger.error("One or more required environment variables (API_ID, API_HASH, BOT_TOKEN, CHANNEL_ID) are missing!")
+    exit(1)
 
+API_ID = int(API_ID)
 
 def get_random_headers():
     user_agents = [
@@ -48,18 +50,23 @@ def get_random_headers():
         "Cache-Control": "no-cache"
     }
 
-
 BLACKLIST_FILE = "blacklist.txt"
 
-def is_blacklisted(name: str) -> bool:
-    if not os.path.exists(BLACKLIST_FILE):
-        return False
+# Load blacklist into memory once
+blacklist = set()
+if os.path.exists(BLACKLIST_FILE):
     with open(BLACKLIST_FILE, "r", encoding="utf-8") as f:
-        return name.strip().lower() in (line.strip().lower() for line in f)
+        blacklist = set(line.strip().lower() for line in f)
+
+def is_blacklisted(name: str) -> bool:
+    return name.strip().lower() in blacklist
 
 def add_to_blacklist(name: str):
-    with open(BLACKLIST_FILE, "a", encoding="utf-8") as f:
-        f.write(f"{name.strip()}\n")
+    normalized = name.strip().lower()
+    if normalized not in blacklist:
+        blacklist.add(normalized)
+        with open(BLACKLIST_FILE, "a", encoding="utf-8") as f:
+            f.write(f"{name.strip()}\n")
 
 app = Flask(__name__)
 bot = Client("video_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -69,7 +76,7 @@ def home():
     return '✅ Bot is running!'
 
 def run_flask():
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
+    app.run(host="0.0.0.0", port=PORT)
 
 keywords = [
     # Original keywords
@@ -101,10 +108,7 @@ keywords = [
     "busty", "shaved", "natural", "tattoo", "glasses"
 ]
 
-
 API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/5/{word}" for word in keywords]
-
-
 
 async def fetch_api_data(session, api_url):
     try:
@@ -140,7 +144,7 @@ async def download_video(video_url, output_path):
         )
         
         try:
-            await asyncio.wait_for(process.communicate(), timeout=300)
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
         except asyncio.TimeoutError:
             logger.error("Download timed out")
             process.kill()
@@ -148,7 +152,7 @@ async def download_video(video_url, output_path):
             return False
         
         if process.returncode != 0:
-            logger.error(f"Download failed with code {process.returncode}")
+            logger.error(f"Download failed with code {process.returncode}, stderr: {stderr.decode(errors='ignore')}")
             return False
         
         return os.path.exists(output_path) and os.path.getsize(output_path) > 0
@@ -173,86 +177,82 @@ async def prepare_thumbnail(url, path):
 async def auto_post():
     logger.info("🔁 Auto post started...")
 
-    while True:
-        try:
-            for selected_api in API_LIST:
-                logger.info(f"🌐 Processing API: {selected_api}")
-                
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                for selected_api in API_LIST:
+                    logger.info(f"🌐 Processing API: {selected_api}")
+
+                    with tempfile.TemporaryDirectory() as temp_dir:
                         api_data = await fetch_api_data(session, selected_api)
 
-                    if not api_data:
-                        logger.warning(f"⚠️ No data from API: {selected_api}")
-                        await asyncio.sleep(60)  # wait before next API
-                        continue
-
-                    success_count = 0
-                    for idx, item in enumerate(api_data[:5]):
-                        if 'name' not in item or 'content_url' not in item:
-                            logger.warning(f"❌ Invalid item at index {idx}: {item}")
+                        if not api_data:
+                            logger.warning(f"⚠️ No data from API: {selected_api}")
+                            await asyncio.sleep(60)  # wait before next API
                             continue
 
-                        video_name = item['name'].strip()
-                        video_url = item['content_url']
-                        thumb_url = item.get('thumbnail')
+                        success_count = 0
+                        for idx, item in enumerate(api_data[:5]):
+                            if 'name' not in item or 'content_url' not in item:
+                                logger.warning(f"❌ Invalid item at index {idx}: {item}")
+                                continue
 
-                        if is_blacklisted(video_name):
-                            logger.info(f"🚫 Skipping blacklisted video: {video_name}")
-                            continue
+                            video_name = item['name'].strip()
+                            video_date = item.get('upload_date', 'Unknown Date')
+                            video_url = item['content_url']
+                            thumb_url = item.get('thumbnail')
 
-                        caption = (
-                            f"🔥 <b>{video_name}</b>\n"
-                            f"✦▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬✦\n"
-                            f"😮 {item.get('description', 'No description available.')}\n\n"
-                            f"<b>⚡️ Stay tuned for more videos on our channel!</b>"
-                        )
+                            if is_blacklisted(video_name):
+                                logger.info(f"🚫 Skipping blacklisted video: {video_name}")
+                                continue
 
-                        file_name = f"video_{idx}_{random.randint(1000,9999)}.mp4"
-                        file_path = os.path.join(temp_dir, file_name)
-
-                        download_success = await download_video(video_url, file_path)
-                        if not download_success:
-                            logger.error(f"❌ Download failed for video {idx}")
-                            continue
-
-                        thumb_path = os.path.join(temp_dir, f"thumb_{idx}.jpg")
-                        thumb_ok = await prepare_thumbnail(thumb_url, thumb_path)
-                        thumb_file = thumb_path if thumb_ok else None
-
-                        buttons = InlineKeyboardMarkup([
-                            [InlineKeyboardButton("📽️ Watch online", url=video_url)],
-                            [InlineKeyboardButton("📺 Join Our Channel", url="https://t.me/Opleech_WD")]
-                        ])
-
-                        try:
-                            await bot.send_video(
-                                chat_id=CHANNEL_ID,
-                                video=file_path,
-                                caption=caption,
-                                parse_mode=ParseMode.HTML,
-                                reply_markup=buttons,
-                                supports_streaming=True,
-                                thumb=thumb_file
+                            caption = (
+                                f"Filename :<b>{video_name}</b>\n"
+                                f"Uploading Date : <b>{video_date}</b>\n"
                             )
-                            add_to_blacklist(video_name)
-                            success_count += 1
-                            logger.info(f"✅ Posted: {video_name}")
-                        except Exception as e:
-                            logger.error(f"❌ Error sending video: {e}")
 
-                        # Delay between each video
-                        await asyncio.sleep(30)  # <-- To avoid Telegram rate limit
+                            file_name = f"video_{idx}_{random.randint(1000,9999)}.mp4"
+                            file_path = os.path.join(temp_dir, file_name)
 
-                logger.info(f"✅ Finished API: {selected_api} | Videos posted: {success_count}")
-                await asyncio.sleep(60)  # Wait between APIs
+                            download_success = await download_video(video_url, file_path)
+                            if not download_success:
+                                logger.error(f"❌ Download failed for video {idx} - {video_name}")
+                                continue
 
-        except Exception as e:
-            logger.exception(f"🚨 Auto post error: {e}")
-        
-        # After full round
-        logger.info("🕒 Sleeping for 5 minutes before next round...")
-        await asyncio.sleep(300)
+                            thumb_path = os.path.join(temp_dir, f"thumb_{idx}.jpg")
+                            thumb_ok = await prepare_thumbnail(thumb_url, thumb_path) if thumb_url else False
+                            thumb_file = thumb_path if thumb_ok else None
+
+                            try:
+                                await bot.send_video(
+                                    chat_id=CHANNEL_ID,
+                                    video=file_path,
+                                    caption=caption,
+                                    parse_mode=ParseMode.HTML,
+                                    supports_streaming=True,
+                                    thumb=thumb_file
+                                )
+                                add_to_blacklist(video_name)
+                                success_count += 1
+                                logger.info(f"✅ Posted: {video_name}")
+                            except FloodWait as e:
+                                logger.warning(f"FloodWait: sleeping for {e.x} seconds")
+                                await asyncio.sleep(e.x)
+                            except Exception as e:
+                                logger.error(f"❌ Error sending video: {e}")
+
+                            # Delay between each video to avoid rate limits
+                            await asyncio.sleep(30)
+
+                    logger.info(f"✅ Finished API: {selected_api} | Videos posted: {success_count}")
+                    await asyncio.sleep(60)  # Wait between APIs
+
+            except Exception as e:
+                logger.exception(f"🚨 Auto post error: {e}")
+
+            # After full round
+            logger.info("🕒 Sleeping for 5 minutes before next round...")
+            await asyncio.sleep(300)
 
 @bot.on_message(filters.command("start"))
 async def start_bot(client, message):
