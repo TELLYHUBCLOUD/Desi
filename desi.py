@@ -61,6 +61,7 @@ DUMMY_DATA = [
 ]
 
 keywords = [
+    # Original keywords
     "school", "desi", "college", "bhabhi",
     "aunty", "teacher", "milf", "teen",
     "stepmom", "neighbor", "office", "boss",
@@ -68,7 +69,25 @@ keywords = [
     "secretary", "interview", "romance", "bathroom",
     "kitchen", "public", "hidden", "solo",
     "massage", "lesbian", "cousin", "student",
-    "library", "bus", "train", "hotel"
+    "library", "bus", "train", "hotel",
+
+    # Additional keywords
+    "stepsister", "stepbrother", "stepdad", "uncle",
+    "daddy", "family", "relative",
+
+    "doctor", "patient", "cop", "lawyer",
+    "therapist", "trainer", "coach", "delivery",
+    "plumber", "mechanic",
+
+    "classroom", "locker room", "dressing room",
+    "office desk", "elevator", "parking lot",
+
+    "cheating", "revenge", "blackmail", "voyeur",
+    "seduction", "domination", "submission",
+    "rough", "softcore", "roleplay",
+
+    "big boobs", "curvy", "petite", "thick",
+    "busty", "shaved", "natural", "tattoo", "glasses"
 ]
 
 
