@@ -40,7 +40,7 @@ def get_random_headers():
 API_ID = int(os.environ.get("API_ID", 23241238))
 API_HASH = os.environ.get("API_HASH", "e6ff6e3068dbea75500865ac49c3608f")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8110926083:AAHuuv8B5V_GIfkyPNdrrs8vZBHL2Gl-i24")
-CHANNEL_ID = -1002788615106
+CHANNEL_ID = -1002052121362
 # Hey man your ☝️ channel ID direct add here
 
 
