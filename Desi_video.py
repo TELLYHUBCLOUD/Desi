@@ -201,7 +201,7 @@ async def auto_post():
 
                         video_name = item['name'].strip()
                         video_url = item['content_url']
-                        upload_date = item['content_url']
+                        upload_date = item['upload_date']
                         thumb_url = item.get('thumbnail')
 
                         if is_blacklisted(video_name):
@@ -209,7 +209,7 @@ async def auto_post():
                             continue
 
                         caption = (
-                            f"🔥 <b>{video_name}</b>\n"
+                            f"<b>Filename : {video_name}</b>\n Uploading Date : {upload_date}"
                         )
 
                         file_name = f"video_{idx}_{random.randint(1000,9999)}.mp4"
