@@ -257,7 +257,7 @@ async def auto_post():
         
         # After full round
         logger.info("🕒 Sleeping for 5 minutes before next round...")
-        await asyncio.sleep(300)
+        await asyncio.sleep(100)
 
 @bot.on_message(filters.command("start"))
 async def start_bot(client, message):
