@@ -98,10 +98,10 @@ async def download_video(video_url, output_path, timeout=300):
     try:
         dir_path = os.path.dirname(output_path) or "."
         os.makedirs(dir_path, exist_ok=True)
-        video_name = os.path.basename(output_path)
-        if not video_name:
-            video_name = video_url.split("/")[-1].split("?")[0] or "video.mp4"
-            output_path = os.path.join(dir_path, video_name)
+        filename = os.path.basename(output_path)
+        if not filename:
+            filename = video_url.split("/")[-1].split("?")[0] or "video.mp4"
+            output_path = os.path.join(dir_path, filename)
         cmd = [
             "aria2c",
             video_url,
@@ -184,7 +184,7 @@ async def auto_post():
                             logger.info(f"🚫 Skipping blacklisted video: {video_name}")
                             continue
                         caption = f"<b>Filename : {video_name}</b>\n Uploading Date : {upload_date}"
-                        file_name = f"video_{idx}{random.randint(1000,9999)}.mp4"
+                        file_name = f"{video_name}_{idx}{random.randint(1000,9999)}.mp4"
                         file_path = os.path.join(temp_dir, file_name)
                         download_success = await download_video(video_url, file_path)
                         if not download_success:
