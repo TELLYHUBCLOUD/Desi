@@ -214,7 +214,7 @@ async def auto_post():
                             f"<b>Filename : {video_name}</b>\n Uploading Date : {upload_date}"
                         )
 
-                        file_name = f"video_{idx}_{random.randint(1000,9999)}.mp4"
+                        file_name = f"{video_name}_{idx}_{random.randint(1000,9999)}.mp4"
                         file_path = os.path.join(temp_dir, file_name)
 
                         download_success = await download_video(video_url, file_path)
