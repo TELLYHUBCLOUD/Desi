@@ -106,22 +106,20 @@ async def fetch_api_data(session, api_url):
 
 
 
-async def download_video(video_url, output_path):
+async def download_video(video_url, output_path, timeout=300):
     try:
         # Ensure directory exists
         dir_path = os.path.dirname(output_path) or "."
         os.makedirs(dir_path, exist_ok=True)
-
         # Ensure filename is valid
-        filename = os.path.basename(output_path)
-        if not filename:
-            filename = video_url.split("/")[-1].split("?")[0] or "video.mp4"
-            output_path = os.path.join(dir_path, filename)
-
+        video_name = os.path.basename(output_path)
+        if not video_name:
+            video_name = video_url.split("/")[-1].split("?")[0] or "video.mp4"
+            output_path = os.path.join(dir_path, video_name)
         cmd = [
             "aria2c",
             video_url,
-            "--out", filename,
+            "--out", video_name,
             "--dir", dir_path,
             "--allow-overwrite=true",
             "--max-connection-per-server=16",
@@ -129,41 +127,40 @@ async def download_video(video_url, output_path):
             "--summary-interval=0",
             "--console-log-level=warn"
         ]
-
         logger.info(f"Starting download: {video_url}")
+        logger.info(f"Command: {' '.join(cmd)}")
         start_time = time.time()
-
         process = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-
         try:
-            await asyncio.wait_for(process.communicate(), timeout=300)
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+            if stdout:
+                logger.info(f"stdout: {stdout.decode().strip()}")
+            if stderr:
+                logger.error(f"stderr: {stderr.decode().strip()}")
         except asyncio.TimeoutError:
-            logger.error("Download timed out after 300 seconds.")
+            logger.error("Download timed out after {} seconds.".format(timeout))
             process.kill()
             await process.communicate()
             return False
-
         end_time = time.time()
         elapsed = end_time - start_time
-
         if process.returncode != 0:
             logger.error(f"Download failed with exit code {process.returncode}")
             return False
-
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
             logger.info(f"Download completed successfully in {elapsed:.2f} seconds: {output_path}")
             return True
         else:
             logger.error("Downloaded file is missing or empty.")
             return False
-
     except Exception as e:
-        logger.error(f"Download exception: {str(e)}")
+        logger.error(f"Download exception: {str(e)}", exc_info=True)
         return False
+
 
 async def prepare_thumbnail(url, path):
     try:
