@@ -1,11 +1,9 @@
-pyrogram 
+pyrogram
 tgcrypto
-requests 
+requests
 flask
 aiohttp
 python-dotenv
 aiofiles
-aria2
 pillow
-ffmpeg 
 gunicorn
