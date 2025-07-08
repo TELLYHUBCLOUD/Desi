@@ -98,8 +98,14 @@ keywords = [
     "sexy", "hot", "village", "randi", "bhabi",
     "milf", "mature", "housewife", "college", "friend",
     "lover", "cheating", "romance", "nude", "soft",
-    "massage", "hindi sexy", "desi romance", "indian couple", "rural"
+    "massage", "hindi sexy", "desi romance", "indian couple", "rural",
+    "desi aunty", "indian nude", "desi bhabhi", "mallu hot", "punjabi sexy",
+    "local girl", "private clip", "homemade", "lover romance", "desi love",
+    "dirty talk", "desi cheating", "newly married", "hotel room", "hidden cam",
+    "selfie video", "desi couple", "bathroom clip", "call girl", "indian boobs",
+    "desi lips", "tight dress", "night romance", "indian dance", "strip tease"
 ]
+
 
 
 API_LIST = [
