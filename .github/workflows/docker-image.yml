@@ -26,8 +26,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ github.event.inputs.DOCKERHUB_USERNAME }}/desipom:latest .
+          docker build -t ${{ github.event.inputs.DOCKERHUB_USERNAME }}/desipom:beta .
 
       - name: Push Docker image
         run: |
-          docker push ${{ github.event.inputs.DOCKERHUB_USERNAME }}/desipom:latest
+          docker push ${{ github.event.inputs.DOCKERHUB_USERNAME }}/desipom:beta
