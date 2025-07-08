@@ -4,6 +4,7 @@ import asyncio
 import aiohttp
 import tempfile
 import subprocess
+import ffmpeg
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -15,6 +16,7 @@ import shutil
 import time
 from PIL import Image
 from io import BytesIO
+
 
 # Logging setup
 logging.basicConfig(
