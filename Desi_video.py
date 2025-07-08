@@ -67,30 +67,37 @@ def home():
 def run_flask():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
 
+# keywords = [
+#     "school", "desi", "college", "bhabhi",
+#     "aunty", "teacher", "milf", "teen",
+#     "stepmom", "neighbor", "office", "boss",
+#     "maid", "sister", "mom", "nurse",
+#     "secretary", "interview", "romance", "bathroom",
+#     "kitchen", "public", "hidden", "solo",
+#     "massage", "lesbian", "cousin", "student",
+#     "library", "bus", "train", "hotel",
+#     "stepsister", "stepbrother", "stepdad", "uncle",
+#     "daddy", "family", "relative",
+#     "doctor", "patient", "cop", "lawyer",
+#     "therapist", "trainer", "coach", "delivery",
+#     "plumber", "mechanic",
+#     "classroom", "locker room", "dressing room",
+#     "office desk", "elevator", "parking lot",
+#     "cheating", "revenge", "blackmail", "voyeur",
+#     "seduction", "domination", "submission",
+#     "rough", "softcore", "roleplay",
+#     "big boobs", "curvy", "petite", "thick",
+#     "busty", "shaved", "natural", "tattoo", "glasses"
+# ]
 keywords = [
-    "school", "desi", "college", "bhabhi",
-    "aunty", "teacher", "milf", "teen",
-    "stepmom", "neighbor", "office", "boss",
-    "maid", "sister", "mom", "nurse",
-    "secretary", "interview", "romance", "bathroom",
-    "kitchen", "public", "hidden", "solo",
-    "massage", "lesbian", "cousin", "student",
-    "library", "bus", "train", "hotel",
-    "stepsister", "stepbrother", "stepdad", "uncle",
-    "daddy", "family", "relative",
-    "doctor", "patient", "cop", "lawyer",
-    "therapist", "trainer", "coach", "delivery",
-    "plumber", "mechanic",
-    "classroom", "locker room", "dressing room",
-    "office desk", "elevator", "parking lot",
-    "cheating", "revenge", "blackmail", "voyeur",
-    "seduction", "domination", "submission",
-    "rough", "softcore", "roleplay",
-    "big boobs", "curvy", "petite", "thick",
-    "busty", "shaved", "natural", "tattoo", "glasses"
+    "indian", "desi", "pakistani", "bhabhi"
 ]
 
-API_LIST = [f"https://you-pom-lover.vercel.app/xnxx/10/{word}" for word in keywords]
+API_LIST = [
+    f"https://you-pom-lover.vercel.app/xvideos/10/{word}",
+    f"https://you-pom-lover.vercel.app/xnxx/10/{word}"
+] for word in keywords
+
 
 async def fetch_api_data(session, api_url):
     try:
