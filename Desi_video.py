@@ -201,6 +201,28 @@ async def prepare_thumbnail(url, path):
         logger.error(f"Thumbnail convert failed: {e}")
     return False
 
+async def get_video_duration(file_path):
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            file_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, _ = await process.communicate()
+        duration_str = stdout.decode().strip()
+        if duration_str:
+            return int(float(duration_str))
+        else:
+            logger.warning(f"ffprobe returned no duration for {file_path}")
+            return 0
+    except Exception as e:
+        logger.error(f"Failed to get video duration: {e}")
+        return 0
+
+
 async def auto_post():
     logger.info("🔁 Auto post started...")
 
@@ -239,6 +261,7 @@ async def auto_post():
 
                         file_name = f"{video_name}_{idx}_{random.randint(1000,9999)}.mp4"
                         file_path = os.path.join(temp_dir, file_name)
+                        duration = await get_video_duration(file_path)
 
                         download_success = await download_video(video_url, file_path)
                         if not download_success:
@@ -261,7 +284,8 @@ async def auto_post():
                                 caption=caption,
                                 parse_mode=ParseMode.HTML,
                                 supports_streaming=True,
-                                thumb=thumb_file
+                                thumb=thumb_file,
+                                duration=duration
                             )
                             add_to_blacklist(video_name)
                             success_count += 1
