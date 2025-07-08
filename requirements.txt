@@ -8,3 +8,7 @@ aiofiles
 pillow
 gunicorn
 ffmpeg
+gcc 
+python3-dev
+ffmpeg
+aria2
