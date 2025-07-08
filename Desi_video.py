@@ -225,6 +225,22 @@ async def get_video_duration(file_path):
         return 0
 
 
+async def fix_video_metadata(input_path, output_path):
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "ffmpeg", "-y", "-i", input_path,
+            "-c", "copy", "-map", "0", "-movflags", "faststart",
+            output_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await process.communicate()
+        return process.returncode == 0
+    except Exception as e:
+        logger.error(f"Metadata fix error: {e}")
+        return False
+
+
 async def auto_post():
     logger.info("🔁 Auto post started...")
 
@@ -239,7 +255,7 @@ async def auto_post():
 
                     if not api_data:
                         logger.warning(f"⚠️ No data from API: {selected_api}")
-                        await asyncio.sleep(60)  # wait before next API
+                        await asyncio.sleep(60)
                         continue
 
                     success_count = 0
@@ -263,22 +279,36 @@ async def auto_post():
 
                         file_name = f"{video_name}_{idx}_{random.randint(1000,9999)}.mp4"
                         file_path = os.path.join(temp_dir, file_name)
-                        duration = await get_video_duration(file_path)
 
                         download_success = await download_video(video_url, file_path)
                         if not download_success:
                             logger.error(f"❌ Download failed for video {idx}")
                             continue
 
+                        # Metadata fix
+                        fixed_path = file_path.replace(".mp4", "_fixed.mp4")
+                        fix_ok = await fix_video_metadata(file_path, fixed_path)
+                        if fix_ok:
+                            os.remove(file_path)
+                            file_path = fixed_path
+                        else:
+                            logger.warning(f"Metadata fix failed for {file_path}")
+
+                        # Get duration
+                        duration = await get_video_duration(file_path)
+
+                        # Prepare thumbnail
                         thumb_path = os.path.join(temp_dir, f"thumb_{idx}.jpg")
                         thumb_ok = await prepare_thumbnail(thumb_url, thumb_path)
                         thumb_file = thumb_path if thumb_ok else None
 
+                        # Inline buttons
                         buttons = InlineKeyboardMarkup([
                             [InlineKeyboardButton("📽️ Watch online", url=video_url)],
                             [InlineKeyboardButton("📺 Join Our Channel", url="https://t.me/Opleech_WD")]
                         ])
 
+                        # Upload video to Telegram
                         try:
                             await bot.send_video(
                                 chat_id=CHANNEL_ID,
@@ -291,20 +321,18 @@ async def auto_post():
                             )
                             add_to_blacklist(video_name)
                             success_count += 1
-                            logger.info(f"✅ Posted: {video_name}")
+                            logger.info(f"✅ Posted: {video_name} | Duration: {duration} sec")
                         except Exception as e:
                             logger.error(f"❌ Error sending video: {e}")
 
-                        # Delay between each video
-                        await asyncio.sleep(30)  # <-- To avoid Telegram rate limit
+                        await asyncio.sleep(30)  # Avoid rate limits
 
                 logger.info(f"✅ Finished API: {selected_api} | Videos posted: {success_count}")
-                await asyncio.sleep(60)  # Wait between APIs
+                await asyncio.sleep(60)
 
         except Exception as e:
             logger.exception(f"🚨 Auto post error: {e}")
-        
-        # After full round
+
         logger.info("🕒 Sleeping for 5 minutes before next round...")
         await asyncio.sleep(60)
 
