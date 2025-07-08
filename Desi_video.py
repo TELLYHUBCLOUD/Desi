@@ -109,10 +109,11 @@ keywords = [
 
 
 API_LIST = [
-    f"https://you-pom-lover.vercel.app/xvideos/10/{word}",
-    f"https://you-pom-lover.vercel.app/xnxx/10/{word}",
-    f"https://you-pom-lover.vercel.app/redtube/10/{word}"
-] for word in keywords
+    f"https://you-pom-lover.vercel.app/{site}/10/{word}"
+    for site in ["xvideos", "xnxx", "redtube"]
+    for word in keywords
+]
+
 
 async def fetch_api_data(session, api_url):
     try:
