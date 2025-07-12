@@ -112,7 +112,7 @@ keywords = [
 
 API_LIST = [
     f"https://you-pom-lover.vercel.app/{site}/10/{word}"
-    for site in ["xvideos", "xnxx", "redtube"]
+    for site in ["xvideos", "xnxx"]
     for word in keywords
 ]
 
